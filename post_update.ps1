@@ -1,34 +1,60 @@
 
 $url = "https://github.com/xdnw/locutus/"
 $releaseFile = "C:\Users\jesse\GitHub\locutus3\build\libs\shadowJar-Locutus-1.0-SNAPSHOT-all.jar"
-$releaseTitle = "Locutus (Adelphi)"
+$releaseTitle = "Locutus July Update"
 $releaseDesc = @'
-## __**Changelog April 09/2024 -> May 17/2024**__
-Added `worth` column to transfer sheet
-Custom sheet nations are now sorted by alliance/cities/id (e.g. `/sheet_custom auto`)
-Added IA audit for activity center
-Added various placeholders for sheets and commands
-Fixed formatting for various commands due to discord markdown changes
-Added gpt-moderation checks to Mail and DM related commands (as mitigation for IA staff abusing mail commands)
-Fixed interview question commands
-Added `/channel sort category_filter` and `/channel sort sheet` for bulk sorting and management of nation channels (e.g. interviews) (see `/help command`)
-- Includes checks such as user leaving server, nation activity/vm, duplicate channels
-Added `/interview channel auto_rename` - to auto name channels based on the user's nation
-Added sheet for `/alliance departures nationoralliance: `
-Improved alliance join/leave tracking
-Added `/role setalias locutusrole:ESPIONAGE_ALERTS`
-Always included online nations in spy alerts instead of only the current probability ones / exclude treatied allies 
-Added `/war room delete_planning`
-Added `/war room delete_for_enemies`
-Updated `/treaty gw_nap`
-Added `/tax set_from_sheet sheet:` to bulk set tax brackets based on a spreadsheet (as alternative to filter based tax automation)
-Added setting `MEMBER_CAN_ESCROW` (default: false), fixed a bug with escrow commands
-Fixed continent bug with optimalbuild slash
-Update `!Grant` commands retain instructions after confirmation
-Improved `/war counter nation` new arguments and feedback
-'@
-$tagName = "v2.3.3"
+Improved optimalbuild handling for manu=false and infralow, added `timeout` argument
+Added `/mail read` and `/mail search`
+Added transfer status summary in disburse command
+Added `/embed rename button`
+Add additional notes to defensive wars about how to mark alliances as enemies 
+Added `/conflict edit add_forum_post`, `/conflict sync db_file` + other conflict command changes
+Added who suggestions for invalid input
+Remove member role requirements for some non-guild information related commands:
+- build get, counterstats, various trade commands, spies, various nation placeholders
+Added guiding_satellite_np and nuclear_launch_facility_np to snapshots
+Added /nation vm_history command
+Fixed warcostranking nuke/missile kill stats
+Fixed snapshot arguments for VM and project data/filters
+Fixed leftaa / alliance departures when timeframe is specified
+Fixed /grant_template bug
+Adapted the following legacy `!` commands to slash
+- Various debug/administration commands
+- /interview sheet
+- /offshore list prolific
+- /offshore list all
+- /offshore find for_coalition
+- /offshore find for_enemies
+- /alers trade unsubscribe
+- /alerts trade list
+- /war room purge
+- /admin command multiple
+- /admin command format_for_nations
+- /coalition sheet
+- /alerts bank list
+- /alerts bank unsubscribe
+- /alerts bank subscribe
+- /alliance stats loot_ranking
+- /stats_war by_day warcost_versus
+- /stats_war by_day warcost_global
+- /stats_war attack_breakdown versus
+- /admin dm
+- /grant project
+- /grant city
+- /grant land
+- /grant infra
+- /grant build
+- /grant unit
+- /grant consumption
+- /grant warchest
 
+Added a notice when using a legacy command:
+'@
+
+$version = "2.3.4"
+$tagName = "v$version"
+$releaseDirectory = [System.IO.Path]::GetDirectoryName($releaseFile)
+$uploadedFileName = [System.IO.Path]::Combine($releaseDirectory, "Locutus-$version.jar")
 
 $splitUrl = $url.Split("/")
 $repoOwner = $splitUrl[3]
@@ -41,5 +67,10 @@ Set-Location -Path "C:\Users\jesse\GitHub\locutus3" # Replace with your reposito
 # Create a new release
 gh release create $tagName -t $releaseTitle -n $releaseDesc
 
+# Make copy of file with uploadedFileName
+Copy-Item $releaseFile $uploadedFileName
+# delete it when this script exits
+Register-EngineEvent PowerShell.Exiting -Action { Remove-Item $uploadedFileName }
+
 # Upload the file to the release
-gh release upload $tagName $releaseFile
+gh release upload $tagName $uploadedFileName
